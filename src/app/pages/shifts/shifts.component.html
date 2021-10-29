@@ -1,0 +1,336 @@
+<div class="row" materialize [formGroup]="shiftsForm" ngNativeValidate>
+  <div class="col m12">
+    <h3 class="hs-text-color">Turnos</h3>
+  </div>
+  <div class="row">
+    <div class="col m4">
+      <nav class="hs-color">
+        <div class="nav-wrapper">
+          <div class="col s12">
+            <a routerLink="/dashboard/home" class="breadcrumb">Inicio</a>
+            <a routerLink="/dashboard/shifts" class="breadcrumb">Turnos</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+    <div class="col m2 offset-m6">
+      <a class="btn-floating right tooltipped hs-color" materialize="tooltip" (click)="openModalfilter()" data-position="left" data-delay="50" data-tooltip="Agregar filtro">
+        <i class="material-icons">edit</i>
+      </a>
+    </div>
+    
+  <div *ngIf="$shifts | loading | async as shiftsData;">
+    <!-- clients data -->
+    <ng-template [ngIf]="shiftsData.value">
+      <div>
+        <div class="col m12">
+          <div class="card-panel no-padding">
+            <table class="striped">
+              <thead class="hs-color">
+                <tr>
+                  <th class="white-text center">Tipo</th>
+                  <th class="white-text center">Fecha</th>
+                  <th class="white-text center">Inicio</th>
+                  <th class="white-text center">Termino</th>
+                  <th class="white-text center">Locacion</th>
+                  <th class="white-text center">Cliente</th>
+                  <th class="white-text center">Guardias</th>
+                  <th class="white-text center">Novedades</th>
+                  <th class="white-text center">Visitas</th>
+                  <th class="white-text center">Enviar</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let shift of shiftsData.value.shifts">
+                  <!-- <pre>{{ shift | json }}</pre> -->
+                  <td *ngIf="shift.type === 'Day'" class="">Día</td>
+                  <td *ngIf="shift.type === 'Night'" class="">Noche</td>
+                  <td class="">{{(shift.date | date: 'shortDate' )}}</td>
+                  <td class="">{{('2020-12-31:' + shift.start) | date: 'shortTime'}}</td>
+                  <td class="">{{('2020-12-31:' + shift.finish) | date: 'shortTime'}}</td>
+                  <td class="">{{(shift.shiftPlace || '')}}</td>
+                  <td class="">{{(shift.clientClient.name || '')}}</td>
+                  <!-- Modal Trigger -->
+                  <td class="">
+                    <a class="btn-flat valign-wrapper" (click)="openModal(shift.guards,shift.guardLocation)">
+                      <div class="row valign-wrapper">
+                        <i class=" material-icons hs-text-color" id="icon">assignment_ind</i>
+                        <span class="badge amber white-text">{{shift.guards.length}}</span>
+                      </div>
+                    </a>
+                  </td>
+                  <td class=" center">
+                    <a *ngIf="shift.news.length" class="btn-flat" (click)="openModalNews(shift.news)">
+                      <div class="valign-wrapper">
+                        <i class="material-icons hs-text-color" id="icon">assignment</i>
+                        <span class="badge amber white-text">{{shift.news.length}}</span>
+                      </div>
+                    </a>
+                    <a *ngIf="!shift.news.length">
+                      <i class="material-icons grey-text text-lighten-1" id="icon">cancel</i>
+                    </a>
+                  </td>
+                  <td class=" center">
+                    <a *ngIf="shift.visits.length" class="btn-flat" (click)="openModalVisits(shift.visits)">
+                      <div class="valign-wrapper">
+                        <i class="material-icons hs-text-color" id="icon">directions_walk</i>
+                        <span class="badge amber white-text">{{shift.visits.length}}</span>
+                      </div>
+                      
+                    </a>
+                    <a *ngIf="!shift.visits.length">
+                      <i class="material-icons grey-text text-lighten-1" id="icon">cancel</i>
+                    </a>
+                  </td>
+                  <td class="">
+                    <a class="btn-flat" (click)="sendReport(shift.shiftId,shift.client)">
+                      <i class="material-icons hs-text-color" id="icon">email</i>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ul class="pagination card-panel center">
+            <li class="waves-effect" [ngClass]="{'disabled' : 1==actualPage}"><a ><i class="material-icons" (click)="prevPage()">chevron_left</i></a></li>
+            <li *ngFor="let page of pages" [ngClass]="{'hs-color' : page==actualPage}" (click)="goToPage(page)"><a [ngClass]="{'white-text' : page==actualPage}">{{page}}</a></li>
+            <li class="waves-effect" [ngClass]="{'disabled' : pages.length==actualPage}"><a ><i class="material-icons" (click)="nextPage()">chevron_right</i></a></li>
+          </ul>
+        </div>
+      </div>
+    </ng-template>
+    <!-- error for get clients data -->
+    <ng-template [ngIf]="shiftsData.error">
+      <div class="col l6 offset-l3 center">
+        <div class="card-panel">
+          <i class="material-icons large amber-text">sentiment_dissatisfied</i>
+          <h3>No se encuentran los turnos</h3>
+          <p>No hay ningun turno ingresado. Se sugiere que ingrese alguno.</p>
+        </div>
+      </div>
+    </ng-template>
+    <!-- loading for get clients data -->
+    <ng-template [ngIf]="shiftsData.loading">
+      <div class="row center">
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="preloader-wrapper big active">
+          <div class="spinner-layer spinner-blue-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+              <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large tooltipped hs-color" materialize="tooltip" routerLink="/dashboard/createShift"
+    data-position="left" data-delay="50" data-tooltip="Crear turno">
+    <i class="large material-icons">add</i>
+  </a>
+</div>
+
+  <!-- Modal Structure Guards -->
+<div id="modal" class="modal modal-fixed-footer" materialize="modal" [materializeParams]="[{dismissible: false}]" [materializeActions]="modalActions">
+  <nav id="modal_nav" class="row hs-color">
+    <div class="col m11 no-margin">
+      <ul>
+        <li><div class="valign-wrapper"><i class="material-icons">security</i><h5>Guardias</h5></div></li>
+      </ul>
+    </div>
+    <div >
+      <ul>
+        <li ><a class="modal-close waves-effect waves-blue"><i class="material-icons">close</i></a></li>
+        <li></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="modal-content">
+    <div class="row">
+      <div *ngFor="let guard of guardsShiftSelected">
+        <div class="col m7 offset-m3">
+          <div class="card horizontal hoverable">
+            <div class="card-image center ">
+                <img class="image-guard " src="../../../assets/imgs/Police Officer1_RF_RMPL-01.png">
+            </div>
+            <div class="card-stacked ">
+              <div class="card-content">
+                <div>
+                  <div class="valign-wrapper"><i class="material-icons hs-text-color">person</i>{{(guard.firstname || '') + ' ' + (guard.lastname || '')}}</div>
+                  <div class="valign-wrapper"><i class="material-icons hs-text-color">subtitles</i>{{ guard.rut }}</div>
+                  <div class="valign-wrapper"><i class="material-icons hs-text-color">local_phone</i>{{ guard.phone }}</div>
+                  <div *ngIf="gpsGuardsShiftSelected">
+                    <div *ngFor="let locations of gpsGuardsShiftSelected">
+                      <a *ngIf="guard.id == locations.userId" class="btn-flat pading-buton-text" href="https://www.google.cl/maps/place/ {{locations.location}}" target="_blank" rel="noopener noreferrer" ><div class="valign-wrapper "><i class="material-icons hs-text-color">gps_fixed</i>{{locations.timeLocation}}</div></a>
+                      <a *ngIf="guard.id != locations.userId"><div class="valign-wrapper"><i class="material-icons grey-text">gps_not_fixed</i></div></a>
+                    </div>
+                  </div>
+                  <div *ngIf="gpsGuardsShiftSelected.length == 0">
+                    <a><div class="valign-wrapper"><i class="material-icons grey-text">gps_not_fixed</i></div></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-blue btn-flat">Cerrar</a>
+  </div>
+</div>
+  <!-- Modal Structure News -->
+<div id="modal2" class="modal modal-fixed-footer" materialize="modal" [materializeParams]="[{dismissible: false}]" [materializeActions]="modalNewsActions">
+  <nav id="modal_nav" class="row hs-color">
+    <div class="col m11 no-margin">
+      <ul>
+        <li><div class="valign-wrapper"><i class="material-icons">assignment</i><h5>Novedades</h5></div></li>
+      </ul>
+    </div>
+    <div >
+      <ul>
+        <li ><a class="modal-close waves-effect waves-blue"><i class="material-icons">close</i></a></li>
+        <li></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="modal-content">
+    <!-- <pre>{{ newsShiftSelected | json }}</pre> -->
+    <table class="striped">
+      <thead class="hs-color">
+        <tr>
+          <th class="white-text">Título</th>
+          <th class="white-text ">Descripción</th>
+        </tr>
+      </thead>
+
+      <tbody >
+        <tr *ngFor="let new of newsShiftSelected">
+          <!-- <pre>{{ shift | json }}</pre> -->
+          <td>{{(new.title || 'Sin titulo')}}</td>
+          <td class="">{{(new.description || 'Sin descripción')}}</td>         
+
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-blue btn-flat">Cerrar</a>
+  </div>
+</div>
+  <!-- Modal Structure Visits -->
+<div id="modal3" class="modal modal-fixed-footer" materialize="modal" [materializeParams]="[{dismissible: false}]" [materializeActions]="modalVisitsActions">
+  <nav id="modal_nav" class="row hs-color">
+    <div class="col m11 no-margin">
+      <ul>
+        <li><div class="valign-wrapper"><i class="material-icons">directions_walk</i><h5>Visitas</h5></div></li>
+      </ul>
+    </div>
+    <div >
+      <ul>
+        <li ><a class="modal-close waves-effect waves-blue"><i class="material-icons">close</i></a></li>
+        <li></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="modal-content">
+    <!-- <pre>{{ newsShiftSelected | json }}</pre> -->
+    <table class="striped">
+      <thead class="hs-color">
+        <tr>
+          <th class="white-text">Nombre</th>
+          <!-- <th class="white-text ">Descripción</th> -->
+          <th class="white-text">Rut</th>
+          <th class="white-text">Patente</th>
+          <th class="white-text">Entrada</th>
+          <th class="white-text">Salida</th>
+        </tr>
+      </thead>
+
+      <tbody >
+        <tr *ngFor="let visit of visitsShiftSelected">
+          <!-- <pre>{{ shift | json }}</pre> -->
+          <td>{{(visit.name || 'Sin registrar')}}</td>
+          <!-- <td class="">{{(visit.patent || 'Sin descripción')}}</td>          -->
+          <td>{{(visit.rut || 'Sin registrar')}}</td>         
+          <td>{{(visit.patent || 'Sin registrar')}}</td>         
+          <td>{{(visit.in || 'Sin registrar')}}</td>         
+          <td>{{(visit.out || 'Sin registrar')}}</td>         
+
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+  <div class="modal-footer">
+    <a class="modal-close waves-effect waves-blue btn-flat">Cerrar</a>
+  </div>
+</div>
+ <!-- Modal Structure Filters -->
+ <div id="modal3" class="modal modal-fixed-footer" materialize="modal" [materializeParams]="[{dismissible: false}]" [materializeActions]="modalfilterActions">
+  <nav id="modal_nav" class="row hs-color">
+    <div class="col m11 no-margin">
+      <ul>
+        <li><div class="valign-wrapper"><i class="material-icons">edit</i><h5>Filtros</h5></div></li>
+      </ul>
+    </div>
+    <div >
+      <ul>
+        <li ><a class="modal-close waves-effect waves-blue"><i class="material-icons">close</i></a></li>
+        <li></li>
+      </ul>
+    </div>
+  </nav>
+  <form materialize [formGroup]="filtersForm" (ngSubmit)="addFilter()">
+    <div class="modal-content">
+      <div class="row">
+        <div class="row">
+          <div class="input-field col s12">
+            <input placeholder="Placeholder" id="client" list="clients" type="text" class="validate" formControlName="client">
+            <label for="client">Cliente</label>
+            <datalist id="clients" *ngIf="$clients | async as clients">
+              <option *ngFor="let client of clients.clients" [value]="client.name"></option>
+            </datalist>
+          </div>
+          <div class="input-field col s12">
+            <input id="date" type="date" formControlName="date" [min]="minDate" [max]="maxDate">
+            <label for="date" class="active">Fecha</label>
+          </div>
+          <div class="input-field col s12">
+            <input id="icon_prefix" formControlName="limit" list="limit" type="number" class="validate">
+            <label for="limit">limite</label>
+            <datalist id="limit">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+            </datalist>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="modal-action modal-close waves-effect btn-flat ">
+        filtrar
+      </button>
+    </div>
+  </form>
+</div>

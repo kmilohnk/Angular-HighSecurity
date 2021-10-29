@@ -1,0 +1,18 @@
+<div class="navbar-fixed">
+  <nav class="white">
+    <div class="nav-wrapper container">
+      <a class="brand-logo"><img src="../../../assets/imgs/logo.png" ></a>
+      <ul class="right hide-on-med-and-down" *ngIf="user">
+        <li><a materialize="dropdown" class="dropdown-button hs-text-color" data-activates="dropdown1" data-hover="true" data-beloworigin="true"><i class="material-icons hs-text-color right">account_circle</i><strong>{{(user.firstname || '') + ' ' + (user.lastname || '')}}</strong></a></li>
+      </ul>
+    </div>
+  </nav>
+</div>
+
+
+<!-- Dropdown Structure -->
+<ul id="dropdown1" class="dropdown-content">
+  <li><a routerLink="/dashboard/profile">Perfil</a></li>
+  <li class="divider"></li>
+  <li><a (click)="logout()">Salir</a></li>
+</ul>

@@ -1,0 +1,78 @@
+<div class="row">
+  <div class="col m12">
+    <h3 class="hs-text-color">Guardias</h3>
+  </div>
+  <div class="row">
+    <div class="col m4">
+      <nav class="hs-color">
+        <div class="nav-wrapper">
+          <div class="col s12">
+            <a routerLink="/dashboard/home" class="breadcrumb">Inicio</a>
+            <a routerLink="/dashboard/guards" class="breadcrumb">Guardias</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+  <div *ngIf="guards$ | loading | async as guardsData;">
+
+    <!-- guards data -->
+    <ng-template [ngIf]="guardsData.value">
+      <div *ngFor="let guard of guardsData.value.guards" class="col m4">
+        <div class="card">
+          <div class="card-image center ">
+            <img class="image-guard " src="../../../assets/imgs/Police Officer1_RF_RMPL-01.png">
+          </div>
+          <div class="card-content">
+            <div class="valign-wrapper"><i class="material-icons ">person</i>{{(guard.firstname || '') + ' ' + (guard.lastname || '')}}</div>
+            <div class="valign-wrapper"><i class="material-icons ">subtitles</i>{{ guard.rut }}</div>
+            <div class="valign-wrapper"><i class="material-icons ">local_phone</i>{{ guard.phone }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- error for get guards data -->
+    <ng-template [ngIf]="guardsData.error">
+      <div class="col l6 offset-l3 center">
+        <div class="card-panel">
+          <i class="material-icons large amber-text">sentiment_dissatisfied</i>
+          <h3>No se encuentran los guardias</h3>
+          <p>No hay ningun guardia ingresado. Se sugiere que ingrese alguno.</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- loading for get guards data -->
+    <ng-template [ngIf]="guardsData.loading">
+      <div class="row center">
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="row"></div>
+        <div class="preloader-wrapper big active">
+          <div class="spinner-layer spinner-blue-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>
+<div class="fixed-action-btn">
+  <a class="btn-floating btn-large tooltipped hs-color" data-position="left" data-delay="50" data-tooltip="crear guardia" materialize="tooltip" routerLink="/dashboard/createGuard">
+    <i class="large material-icons">add</i>
+  </a>
+</div>
