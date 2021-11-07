@@ -92,7 +92,7 @@ export class CreateShiftComponent implements OnInit {
       throw Error('Error en tipo de turno')
     }
     this.guardsSelected = this.guardsSelected.filter((value, index) => this.guardsSelected.indexOf(value) === index)
-    new Promise(async (resolve, reject) => {
+    new Promise<void>(async (resolve, reject) => {
       for await (const guardChip of this.guardsSelected) {
         if (this.guardsNames.includes(guardChip)) {
           for await (const apiGuard of this.guards) {
